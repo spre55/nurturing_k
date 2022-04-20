@@ -11,33 +11,63 @@ export default {
   name: 'NurturingField',
   state: 'usually',
   timestamp: Date.now(),
+  directionX: 1,
+  directionY: 1,
   x: 0,
   y: 0,
   image: null,
   beforeCreate() {
     this.image = new Image();
     this.image.src = '/monster.png';
+    this.x = 100;
+    this.y = 250;
+    this.directionX = 1;
+    this.directionY = 1;
   },
   mounted() {
     this.canvas = this.$refs.canvas;
-    this.drawing(this.canvas.getContext("2d"))
+    this.context = this.canvas.getContext("2d");
+    this.drawing();
   },
   methods: {
-    drawing(context) {
+    drawing() {
       let draw = () => {
-        if (Date.now() < (this.timestamp + 1800)) return window.requestAnimationFrame(draw);
-        context.drawImage(this.image, this.x, this.y, 100, 100);
+        if (Date.now() < (this.timestamp)) return requestAnimationFrame(draw);
+        this.context.clearRect(0,0,300,500);
+        this.context.drawImage(this.image, this.x, this.y, 100, 100);
         this.timestamp = Date.now();
-        window.requestAnimationFrame(draw);
+        this.walk();
+        requestAnimationFrame(draw);
       }
       draw();
-    }
+    },
+    walk() {
+      if (this.canvas.width < this.x + 100 || this.x <= 0) {
+        this.directionX *= -1;
+        if (Math.floor(Math.random() * 2) === 0) {
+          this.directionY *= -1;
+        }
+      }
+
+      if (this.canvas.height < this.y + 100 || this.y <= 0) {
+        this.directionY *= -1;
+        if (Math.floor(Math.random() * 2) === 0) {
+          this.directionX *= -1;
+        }
+      }
+
+      this.x += (this.directionX * Math.floor(Math.random() * 5));
+      this.y += (this.directionY * Math.floor(Math.random() * 5));
+    },
+    changeDirection() {
+
+    },
   },
 }
 </script>
 
 <style scoped>
 canvas {
-  border: 1px solid #fff;
+  border: 1px solid #000;
 }
 </style>
