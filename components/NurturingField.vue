@@ -124,10 +124,11 @@ export default {
 <style scoped>
 canvas {
   border: 1px solid #000;
+  background: url('/bg_normal.png');
 }
 
 .love-gage {
-  background-image: url('/heart.png');
+  background: url('/heart.png');
   background-size: contain;
   height: 50px;
   width: 50px;
