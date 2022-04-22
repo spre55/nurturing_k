@@ -2,7 +2,10 @@
   <v-row class="ma-10" justify="center" align="center">
     <v-col cols="12" sm="8" md="6">
       <v-row justify="center" align="center">
-        <div class="love-gage">{{ love }}</div>
+        <div class="love-gage">
+          <meter max="100" high="90" low="50" optimum="0" min="0" :value="love"></meter>
+        </div>
+        
       </v-row>
       <v-row justify="center" align="center">
         <canvas ref="canvas" width="300" height="500"></canvas>
@@ -27,6 +30,8 @@ export default {
   image: null,
   happyImage: null,
   bokobokoImage: null,
+  shotenImage: null,
+  shoten2Image: null,
   buffer: 0,
   data() {
     return {
@@ -35,18 +40,26 @@ export default {
   },
   watch: {
     love: function (n, o) {
-      console.log(n, o);
+      if (n >= 100) {
+        this.state = 'death'
+      }
     },
   },
   beforeCreate() {
     this.image = new Image();
-    this.image.src = '/monster.png';
+    this.image.src = '/monster/000/main.png';
 
     this.happyImage = new Image();
-    this.happyImage.src = '/k_happy.png';
+    this.happyImage.src = '/monster/000/eating.png';
 
     this.bokobokoImage = new Image();
-    this.bokobokoImage.src = '/bokoboko.png';
+    this.bokobokoImage.src = '/monster/000/bokoboko.png';
+
+    this.shotenImage = new Image();
+    this.shotenImage.src = '/monster/000/shoten.png';
+
+    this.shoten2Image = new Image();
+    this.shoten2Image.src = '/monster/000/shoten2.png';
 
     this.x = 100;
     this.y = 250;
@@ -71,6 +84,12 @@ export default {
             break;
           case 'bokoboko':
             this.bokoboko();
+            break;
+          case 'death':
+            this.death();
+            break;
+          case 'shoten':
+            this.shoten();
             break;
           default:
             this.walk();
@@ -106,16 +125,36 @@ export default {
       this.context.drawImage(this.happyImage, this.x, this.y, 100, 100);
       this.state = 'usually';
       this.buffer = 1000;
-      this.love++;
+      this.love+=10;
     },
     bokoboko() {
       this.context.drawImage(this.bokobokoImage, this.x, this.y, 100, 100);
       this.state = 'usually';
       this.buffer = 1000;
-      this.love++;
+      this.love+=20;
+    },
+    death() {
+      this.context.drawImage(this.shotenImage, this.x, this.y, 200, 100);
+      this.state = 'shoten';
+      this.buffer = 1000;
+    },
+    shoten() {
+      this.context.drawImage(this.shoten2Image, this.x, this.y, 100, 100);
+      this.y--;
+      this.buffer = 0;
+      if (this.y < -80) {
+        this.state = 'usually'
+        this.x = 100;
+        this.y = 250;
+        this.directionX = 1;
+        this.directionY = 1;
+        this.love = 0;
+        this.buffer = 300;
+      }
+      
     },
     changeDirection() {
-      
+
     },
   },
 }
@@ -127,14 +166,20 @@ canvas {
   background: url('/bg_normal.png');
 }
 
+meter {
+  width: 100%;
+}
+
 .love-gage {
   background: url('/heart.png');
   background-size: contain;
   height: 50px;
-  width: 50px;
+  width: 300px;
   text-align: center;
-  margin: auto;
+  margin: 10px auto;
   font-size: 15pt;
+  background-repeat: no-repeat;
   padding-top: 10px;
+  background-position-x: center;
 }
 </style>
