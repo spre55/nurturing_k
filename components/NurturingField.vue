@@ -12,7 +12,7 @@
       </v-row>
       <v-row justify="center" align="center">
         <v-btn class="ma-4" v-on:click="state='happy'">エサやり</v-btn>
-        <v-btn class="ma-4" v-on:click="state='bokoboko'">ボコボコ</v-btn>
+        <v-btn class="ma-4" v-on:click="state='nadenade'">ナデナデ</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -30,6 +30,7 @@ export default {
   image: null,
   happyImage: null,
   bokobokoImage: null,
+  nadenadeImage: null,
   shotenImage: null,
   shoten2Image: null,
   buffer: 0,
@@ -47,19 +48,22 @@ export default {
   },
   beforeCreate() {
     this.image = new Image();
-    this.image.src = '/monster/000/main.png';
+    this.image.src = '/monster/010/main.png';
 
     this.happyImage = new Image();
-    this.happyImage.src = '/monster/000/eating.png';
+    this.happyImage.src = '/monster/010/eating.png';
 
     this.bokobokoImage = new Image();
-    this.bokobokoImage.src = '/monster/000/bokoboko.png';
+    this.bokobokoImage.src = '/monster/010/bokoboko.png';
+
+    this.nadenadeImage = new Image();
+    this.nadenadeImage.src = '/monster/010/nadenade.png';
 
     this.shotenImage = new Image();
-    this.shotenImage.src = '/monster/000/shoten.png';
+    this.shotenImage.src = '/monster/010/shoten.png';
 
     this.shoten2Image = new Image();
-    this.shoten2Image.src = '/monster/000/shoten2.png';
+    this.shoten2Image.src = '/monster/010/shoten2.png';
 
     this.x = 100;
     this.y = 250;
@@ -85,6 +89,9 @@ export default {
           case 'bokoboko':
             this.bokoboko();
             break;
+          case 'nadenade':
+            this.nadenade();
+            break;
           case 'death':
             this.death();
             break;
@@ -103,23 +110,57 @@ export default {
     walk() {
       this.context.drawImage(this.image, this.x, this.y, 100, 100);
 
-      if (this.canvas.width < this.x + 100 || this.x <= 0) {
-        this.directionX *= -1;
+      let isNotOver = true
+      // 右横にめり込み時
+      if (this.canvas.width < this.x + 100) {
+        isNotOver = false
+        this.directionX = -1;
+        if (Math.floor(Math.random() * 2) === 0) {
+          this.directionY *= -1;
+        }
+      }
+      // 左横にめり込み時
+      if (this.x <= 0) {
+        isNotOver = false
+        this.directionX = 1;
         if (Math.floor(Math.random() * 2) === 0) {
           this.directionY *= -1;
         }
       }
 
-      if (this.canvas.height < this.y + 100 || this.y <= 0) {
-        this.directionY *= -1;
+      // 上にめり込み時
+      if (this.y <= 0) {
+        isNotOver = false
+        this.directionY = 1;
+        if (Math.floor(Math.random() * 2) === 0) {
+          this.directionX *= -1;
+        }
+      }
+      // 下にめり込み時
+      if (this.canvas.height < this.y + 100) {
+        isNotOver = false
+        this.directionY = -1;
         if (Math.floor(Math.random() * 2) === 0) {
           this.directionX *= -1;
         }
       }
 
+      // 突然の方向転換
+      if (isNotOver) {
+        if (Math.floor(Math.random() * 2) === 0) {
+          this.directionX *= -1;
+        }
+        if (Math.floor(Math.random() * 2) === 0) {
+          this.directionY *= -1;
+        }
+        this.buffer = 500;
+      } else {
+        this.buffer = 0;
+      }
+      
+
       this.x += (this.directionX * Math.floor(Math.random() * 5));
       this.y += (this.directionY * Math.floor(Math.random() * 5));
-      this.buffer = 0;
     },
     happy() {
       this.context.drawImage(this.happyImage, this.x, this.y, 100, 100);
@@ -133,8 +174,14 @@ export default {
       this.buffer = 1000;
       this.love+=20;
     },
+    nadenade() {
+      this.context.drawImage(this.nadenadeImage, this.x, this.y, 100, 100);
+      this.state = 'usually';
+      this.buffer = 1000;
+      this.love+=15;
+    },
     death() {
-      this.context.drawImage(this.shotenImage, this.x, this.y, 200, 100);
+      this.context.drawImage(this.shotenImage, this.x, this.y, 100, 100);
       this.state = 'shoten';
       this.buffer = 1000;
     },
