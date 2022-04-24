@@ -29,13 +29,11 @@ export default {
       directionY: 1,
       x: 100,
       y: 250,
-      image: null,
-      eatingImage: null,
-      bokobokoImage: null,
-      strokingImage: null,
-      shotenImage: null,
-      shoten2Image: null,
       buffer: 0,
+      character: null,
+      step: 0,
+      col: 256,
+      row: 256, 
     }
   },
   watch: {
@@ -46,23 +44,8 @@ export default {
     },
   },
   created() {
-    this.image = new Image();
-    this.image.src = '/monster/010/main.png';
-
-    this.eatingImage = new Image();
-    this.eatingImage.src = '/monster/010/eating.png';
-
-    this.bokobokoImage = new Image();
-    this.bokobokoImage.src = '/monster/010/bokoboko.png';
-
-    this.strokingImage = new Image();
-    this.strokingImage.src = '/monster/010/nadenade.png';
-
-    this.shotenImage = new Image();
-    this.shotenImage.src = '/monster/010/shoten.png';
-
-    this.shoten2Image = new Image();
-    this.shoten2Image.src = '/monster/010/shoten2.png';
+    this.character = new Image();
+    this.character.src = '/monster/010/character.png';
   },
   mounted() {
     this.canvas = this.$refs.canvas;
@@ -78,17 +61,14 @@ export default {
           case 'eating':
             this.eating();
             break;
-          case 'bokoboko':
-            this.bokoboko();
-            break;
           case 'stroking':
             this.stroking();
             break;
           case 'death':
             this.death();
             break;
-          case 'shoten':
-            this.shoten();
+          case 'ascension':
+            this.ascension();
             break;
           default:
             this.walk();
@@ -100,7 +80,11 @@ export default {
       draw();
     },
     walk() {
-      this.context.drawImage(this.image, this.x, this.y, 100, 100);
+      this.context.drawImage(this.character, 0, this.col * this.step, this.row, this.col, this.x, this.y, 100, 100);
+      this.step++;
+      if (this.step > 3) {
+        this.step = 0;
+      }
 
       let isNotOver = true
       // 右横にめり込み時
@@ -152,30 +136,24 @@ export default {
       this.y += (this.directionY * Math.floor(Math.random() * 5));
     },
     eating() {
-      this.context.drawImage(this.eatingImage, this.x, this.y, 100, 100);
+      this.context.drawImage(this.character, 0, this.col * 4, this.row, this.col, this.x, this.y, 100, 100);
       this.state = 'usually';
       this.buffer = 1000;
       this.love+=10;
     },
-    bokoboko() {
-      this.context.drawImage(this.bokobokoImage, this.x, this.y, 100, 100);
-      this.state = 'usually';
-      this.buffer = 1000;
-      this.love+=20;
-    },
     stroking() {
-      this.context.drawImage(this.strokingImage, this.x, this.y, 100, 100);
+      this.context.drawImage(this.character, 0, this.col * 5, this.row, this.col, this.x, this.y, 100, 100);
       this.state = 'usually';
       this.buffer = 1000;
       this.love+=15;
     },
     death() {
-      this.context.drawImage(this.shotenImage, this.x, this.y, 100, 100);
-      this.state = 'shoten';
+      this.context.drawImage(this.character, 0, this.col * 6, this.row, this.col, this.x, this.y, 100, 100);
+      this.state = 'ascension';
       this.buffer = 1000;
     },
-    shoten() {
-      this.context.drawImage(this.shoten2Image, this.x, this.y, 100, 100);
+    ascension() {
+      this.context.drawImage(this.character, 0, this.col * 7, this.row, this.col, this.x, this.y, 100, 100);
       this.y--;
       this.buffer = 0;
       if (this.y < -80) {
