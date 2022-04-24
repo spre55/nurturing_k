@@ -5,14 +5,13 @@
         <div class="love-gage">
           <meter max="100" high="90" low="50" optimum="0" min="0" :value="love"></meter>
         </div>
-        
       </v-row>
       <v-row justify="center" align="center">
         <canvas ref="canvas" width="300" height="500"></canvas>
       </v-row>
       <v-row justify="center" align="center">
-        <v-btn class="ma-4" v-on:click="state='happy'">エサやり</v-btn>
-        <v-btn class="ma-4" v-on:click="state='nadenade'">ナデナデ</v-btn>
+        <v-btn class="ma-4" v-on:click="changeStateToEating()">エサやり</v-btn>
+        <v-btn class="ma-4" v-on:click="changeStateToStroking()">ナデナデ</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -21,22 +20,22 @@
 <script>
 export default {
   name: 'NurturingField',
-  state: 'usually',
-  timestamp: Date.now(),
-  directionX: 1,
-  directionY: 1,
-  x: 0,
-  y: 0,
-  image: null,
-  happyImage: null,
-  bokobokoImage: null,
-  nadenadeImage: null,
-  shotenImage: null,
-  shoten2Image: null,
-  buffer: 0,
-  data() {
+  data: function () {
     return {
       love: 0,
+      state: 'usually',
+      timestamp: Date.now(),
+      directionX: 1,
+      directionY: 1,
+      x: 100,
+      y: 250,
+      image: null,
+      eatingImage: null,
+      bokobokoImage: null,
+      strokingImage: null,
+      shotenImage: null,
+      shoten2Image: null,
+      buffer: 0,
     }
   },
   watch: {
@@ -46,31 +45,24 @@ export default {
       }
     },
   },
-  beforeCreate() {
+  created() {
     this.image = new Image();
     this.image.src = '/monster/010/main.png';
 
-    this.happyImage = new Image();
-    this.happyImage.src = '/monster/010/eating.png';
+    this.eatingImage = new Image();
+    this.eatingImage.src = '/monster/010/eating.png';
 
     this.bokobokoImage = new Image();
     this.bokobokoImage.src = '/monster/010/bokoboko.png';
 
-    this.nadenadeImage = new Image();
-    this.nadenadeImage.src = '/monster/010/nadenade.png';
+    this.strokingImage = new Image();
+    this.strokingImage.src = '/monster/010/nadenade.png';
 
     this.shotenImage = new Image();
     this.shotenImage.src = '/monster/010/shoten.png';
 
     this.shoten2Image = new Image();
     this.shoten2Image.src = '/monster/010/shoten2.png';
-
-    this.x = 100;
-    this.y = 250;
-    this.directionX = 1;
-    this.directionY = 1;
-    this.buffer = 0;
-    this.love = 0;
   },
   mounted() {
     this.canvas = this.$refs.canvas;
@@ -81,16 +73,16 @@ export default {
     drawing() {
       let draw = () => {
         if (Date.now() < (this.timestamp + this.buffer)) return requestAnimationFrame(draw);
-        this.context.clearRect(0,0,300,500); // 画面リフレッシュ
+        this.context.clearRect(0, 0, 300, 500); // 画面リフレッシュ
         switch (this.state) {
-          case 'happy':
-            this.happy();
+          case 'eating':
+            this.eating();
             break;
           case 'bokoboko':
             this.bokoboko();
             break;
-          case 'nadenade':
-            this.nadenade();
+          case 'stroking':
+            this.stroking();
             break;
           case 'death':
             this.death();
@@ -144,7 +136,6 @@ export default {
           this.directionX *= -1;
         }
       }
-
       // 突然の方向転換
       if (isNotOver) {
         if (Math.floor(Math.random() * 2) === 0) {
@@ -157,13 +148,11 @@ export default {
       } else {
         this.buffer = 0;
       }
-      
-
       this.x += (this.directionX * Math.floor(Math.random() * 5));
       this.y += (this.directionY * Math.floor(Math.random() * 5));
     },
-    happy() {
-      this.context.drawImage(this.happyImage, this.x, this.y, 100, 100);
+    eating() {
+      this.context.drawImage(this.eatingImage, this.x, this.y, 100, 100);
       this.state = 'usually';
       this.buffer = 1000;
       this.love+=10;
@@ -174,8 +163,8 @@ export default {
       this.buffer = 1000;
       this.love+=20;
     },
-    nadenade() {
-      this.context.drawImage(this.nadenadeImage, this.x, this.y, 100, 100);
+    stroking() {
+      this.context.drawImage(this.strokingImage, this.x, this.y, 100, 100);
       this.state = 'usually';
       this.buffer = 1000;
       this.love+=15;
@@ -197,13 +186,19 @@ export default {
         this.directionY = 1;
         this.love = 0;
         this.buffer = 300;
+      } 
+    },
+    changeStateToStroking() {
+      if (this.state === 'usually') {
+        this.state = 'stroking'
       }
-      
     },
-    changeDirection() {
-
-    },
-  },
+    changeStateToEating() {
+      if (this.state === 'usually') {
+        this.state = 'eating'
+      }
+    }
+  }
 }
 </script>
 
