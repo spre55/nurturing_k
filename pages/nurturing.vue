@@ -1,13 +1,19 @@
 <template>
   <v-row>
     <v-col class="text-center">
-      <NurturingField />
+      <NurturingField :monsterID="monsterID" :love="love"/>
     </v-col>
   </v-row>
 </template>
 
 <script>
 export default {
-  name: 'Nurturing'
+  name: 'Nurturing',
+  data: function () {
+    return {
+      love: 0,
+      monsterID: "020"
+    }
+  }
 }
 </script>

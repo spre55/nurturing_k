@@ -3,7 +3,7 @@
     <v-col cols="12" sm="8" md="6">
       <v-row justify="center" align="center">
         <div class="love-gage">
-          <meter max="100" high="90" low="50" optimum="0" min="0" :value="love"></meter>
+          <meter max="100" high="90" low="50" optimum="0" min="0" :value="characterLove"></meter>
         </div>
       </v-row>
       <v-row justify="center" align="center">
@@ -11,7 +11,6 @@
       </v-row>
       <v-row justify="center" align="center">
         <v-btn class="ma-4" v-on:click="changeStateToEating()">エサやり</v-btn>
-        <v-btn class="ma-4" v-on:click="changeStateToStroking()">ナデナデ</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -20,24 +19,38 @@
 <script>
 export default {
   name: 'NurturingField',
+  props: {
+    monsterID: {
+      type: String,
+      required: true,
+    },
+    love: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
+  },
   data: function () {
     return {
-      love: 0,
+      // キャラクターの情報
+      character: null, 
+      characterLove: 0,
+      // 移動パラメータ
       state: 'usually',
       timestamp: Date.now(),
       directionX: 1,
       directionY: 1,
+      buffer: 0,
+      // 画像座標パラメータ
       x: 100,
       y: 250,
-      buffer: 0,
-      character: null,
-      step: 0,
       col: 256,
       row: 256, 
+      step: 0
     }
   },
   watch: {
-    love: function (n, o) {
+    characterLove: function (n, o) {
       if (n >= 100) {
         this.state = 'death'
       }
@@ -45,15 +58,21 @@ export default {
   },
   created() {
     this.character = new Image();
-    this.character.src = '/monster/010/character.png';
+    this.character.src = "/monster/" + this.monsterID + "/character.png";
+    this.characterLove = this.love
   },
   mounted() {
     this.canvas = this.$refs.canvas;
     this.context = this.canvas.getContext("2d");
     this.drawing();
+    this.canvas.addEventListener('click', this.onClick, false);
+  },
+  beforeDestroy() {
+    this.canvas.removeEventListener('click', this.onClick, false);
   },
   methods: {
     drawing() {
+      // メインの描画処理
       let draw = () => {
         if (Date.now() < (this.timestamp + this.buffer)) return requestAnimationFrame(draw);
         this.context.clearRect(0, 0, 300, 500); // 画面リフレッシュ
@@ -122,10 +141,10 @@ export default {
       }
       // 突然の方向転換
       if (isNotOver) {
-        if (Math.floor(Math.random() * 2) === 0) {
+        if (Math.floor(Math.random() * 10) === 0) {
           this.directionX *= -1;
         }
-        if (Math.floor(Math.random() * 2) === 0) {
+        if (Math.floor(Math.random() * 10) === 0) {
           this.directionY *= -1;
         }
         this.buffer = 500;
@@ -139,13 +158,13 @@ export default {
       this.context.drawImage(this.character, 0, this.col * 4, this.row, this.col, this.x, this.y, 100, 100);
       this.state = 'usually';
       this.buffer = 1000;
-      this.love+=10;
+      this.characterLove+=10;
     },
     stroking() {
       this.context.drawImage(this.character, 0, this.col * 5, this.row, this.col, this.x, this.y, 100, 100);
       this.state = 'usually';
       this.buffer = 1000;
-      this.love+=15;
+      this.characterLove+=15;
     },
     death() {
       this.context.drawImage(this.character, 0, this.col * 6, this.row, this.col, this.x, this.y, 100, 100);
@@ -162,18 +181,24 @@ export default {
         this.y = 250;
         this.directionX = 1;
         this.directionY = 1;
-        this.love = 0;
+        this.characterLove = 0;
         this.buffer = 300;
       } 
-    },
-    changeStateToStroking() {
-      if (this.state === 'usually') {
-        this.state = 'stroking'
-      }
     },
     changeStateToEating() {
       if (this.state === 'usually') {
         this.state = 'eating'
+      }
+    },
+    onClick(e) {
+      let rect = e.target.getBoundingClientRect();
+      let x = e.clientX - rect.left;
+      let y = e.clientY - rect.top;
+
+      if (this.x <= x && x <= this.x + 100 && this.y <= y && y <= this.y + 100 ) {
+        if (this.state === 'usually') {
+          this.state = 'stroking'
+        }
       }
     }
   }
