@@ -9,9 +9,6 @@
       <v-row justify="center" align="center">
         <canvas ref="canvas" width="300" height="500"></canvas>
       </v-row>
-      <v-row justify="center" align="center">
-        <v-btn class="ma-4" v-on:click="changeStateToEating()">エサやり</v-btn>
-      </v-row>
     </v-col>
   </v-row>
 </template>
@@ -46,7 +43,9 @@ export default {
       y: 250,
       col: 256,
       row: 256, 
-      step: 0
+      step: 0,
+      // 長押し
+      timerId: null,
     }
   },
   watch: {
@@ -66,9 +65,13 @@ export default {
     this.context = this.canvas.getContext("2d");
     this.drawing();
     this.canvas.addEventListener('click', this.onClick, false);
+    this.canvas.addEventListener('mousedown', this.onClickStart, false);
+    this.canvas.addEventListener('mouseup', this.onClickEnd, false);
   },
   beforeDestroy() {
     this.canvas.removeEventListener('click', this.onClick, false);
+    this.canvas.removeEventListener('mousedown', this.onClickStart, false);
+    this.canvas.removeEventListener('mouseup', this.onClickEnd, false);
   },
   methods: {
     drawing() {
@@ -185,22 +188,57 @@ export default {
         this.buffer = 300;
       } 
     },
-    changeStateToEating() {
-      if (this.state === 'usually') {
-        this.state = 'eating'
-      }
-    },
     onClick(e) {
       let rect = e.target.getBoundingClientRect();
       let x = e.clientX - rect.left;
       let y = e.clientY - rect.top;
 
-      if (this.x <= x && x <= this.x + 100 && this.y <= y && y <= this.y + 100 ) {
+      if (this.x <= x && x <= this.x + 100 && this.y <= y && y <= this.y + 100) {
         if (this.state === 'usually') {
           this.state = 'stroking'
         }
       }
-    }
+    },
+    onClickStart(e) {
+      let rect = e.target.getBoundingClientRect();
+      let x = e.clientX - rect.left;
+      let y = e.clientY - rect.top;
+
+      if ( x < this.x || this.x + 100 < x || y < this.y || this.y + 100 < y) {
+        if (this.state === 'usually') {
+          this.timerId = setInterval(()=>{
+            
+            if (this.x + 25 <= x && x <= this.x + 75 && this.y + 25 <= y && y <= this.y + 75) {
+              if (this.state === 'usually') {
+                this.state = 'eating'
+              }
+            } else {
+              // 押した座標に向かって来る
+              if (x < this.x + 25) {
+                this.directionX = -1;
+              } else {
+                this.directionX = 1;
+              }
+
+              if (y < this.y + 25) {
+                this.directionY = -1;
+              } else {
+                this.directionY = 1;
+              }
+
+              this.x += (this.directionX * Math.min(10, Math.abs(this.x + 25 - x)));
+              this.y += (this.directionY * Math.min(10, Math.abs(this.y + 25 - y)));
+
+            }
+
+          }, 200);
+          
+        }
+      }
+    },
+    onClickEnd(e) {
+      clearInterval(this.timerId);
+    },
   }
 }
 </script>
